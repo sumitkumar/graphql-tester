@@ -5,8 +5,11 @@ export function tester({
     url,
     server,
     method = 'POST',
+    headers = null, // allow passing headers
+    /// headers overrides contentType and authorization
     contentType = 'application/graphql',
     authorization = null
+
 }) {
     return (query) => {
         return new Promise((resolve, reject) => {
@@ -31,26 +34,27 @@ export function tester({
             }
         }).then(({url, server}) => {
             return new Promise((resolve, reject) => {
-                let headers = {
-                    'Content-Type': contentType,
-                };
-                if (authorization !== null) headers['Authorization'] = authorization;
+                let h = {
+                  'Content-Type':contentType,
+                }
+                if (authorization !== null) h['Authorization'] = authorization;
+                let header = Object.assign({},h,headers);
 
                 request({
                     method,
                     uri: url,
-                    headers: headers,
+                    headers: header,
                     body: query
                 }, (error, message, body) => {
                     if (server && typeof(server.shutdown) === 'function') {
                         server.shutdown();
                     }
-                    
+
                     if (error) {
                         reject(error);
                     } else {
                         const result = JSON.parse(body);
-                        
+
                         resolve({
                             raw: body,
                             data: result.data,

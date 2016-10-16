@@ -10,9 +10,10 @@ export function create(plugins) {
         creator: (port) => {
             const server = new Hapi.Server();
             server.connection({
-                port
+                host: 'localhost',
+                port,
             });
-            
+
             return server.register(plugins)
                 .then(() => server.start())
                 .then(() => {
